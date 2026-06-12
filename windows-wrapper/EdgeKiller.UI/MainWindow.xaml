@@ -1,0 +1,136 @@
+<Window x:Class="EdgeKiller.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Edge Killer" Height="560" Width="780"
+        MinHeight="520" MinWidth="720"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F7FA">
+    <Window.Resources>
+        <Style x:Key="StatusDot" TargetType="Ellipse">
+            <Setter Property="Width" Value="12" />
+            <Setter Property="Height" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+        </Style>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+            <TextBlock Text="Edge Killer" FontSize="26" FontWeight="SemiBold" Foreground="#18202A" />
+            <TextBlock Text="Remove Microsoft Edge and keep the watchdog active." Margin="0,6,0,0" Foreground="#5A6472" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="White" BorderBrush="#DDE3EA" BorderThickness="1" CornerRadius="6" Padding="18" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Current status" FontSize="16" FontWeight="SemiBold" Foreground="#1C2633" Margin="0,0,0,12" />
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="EdgeDot" Style="{StaticResource StatusDot}" Fill="#9AA6B2" />
+                        <TextBlock Text="Edge browser" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock x:Name="EdgeStatusText" Grid.Column="1" Text="Checking..." Foreground="#5A6472" />
+                </Grid>
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="EdgeCoreDot" Style="{StaticResource StatusDot}" Fill="#9AA6B2" />
+                        <TextBlock Text="EdgeCore" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock x:Name="EdgeCoreStatusText" Grid.Column="1" Text="Checking..." Foreground="#5A6472" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="WebViewDot" Style="{StaticResource StatusDot}" Fill="#9AA6B2" />
+                        <TextBlock Text="Edge WebView2 Runtime" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock x:Name="WebViewStatusText" Grid.Column="1" Text="Checking..." Foreground="#5A6472" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Background="White" BorderBrush="#DDE3EA" BorderThickness="1" CornerRadius="6" Padding="18" Margin="0,0,0,16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <CheckBox x:Name="RemoveWebViewCheckBox"
+                          Grid.Row="0" Grid.Column="0"
+                          Content="Also remove WebView2"
+                          VerticalAlignment="Center"
+                          Foreground="#1C2633" />
+                <Button x:Name="RefreshButton"
+                        Grid.Row="0" Grid.Column="1"
+                        Content="Refresh"
+                        Height="42"
+                        Padding="16,0"
+                        Margin="12,0,0,0"
+                        Click="RefreshButton_Click" />
+                <Button x:Name="RemoveButton"
+                        Grid.Row="0" Grid.Column="2"
+                        Content="One-click remove Edge"
+                        Style="{StaticResource PrimaryButton}"
+                        Margin="12,0,0,0"
+                        Click="RemoveButton_Click" />
+
+                <TextBlock Grid.Row="1" Grid.ColumnSpan="3"
+                           Text="WebView2 is kept by default because some apps use it for embedded web content."
+                           Margin="0,12,0,0"
+                           Foreground="#6A7482"
+                           TextWrapping="Wrap" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Background="#111827" CornerRadius="6" Padding="14">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Run log" Foreground="#DDE7F0" FontWeight="SemiBold" Margin="0,0,0,10" />
+                <TextBox x:Name="LogTextBox"
+                         Grid.Row="1"
+                         Background="#111827"
+                         Foreground="#DDE7F0"
+                         BorderThickness="0"
+                         FontFamily="Consolas"
+                         FontSize="12"
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

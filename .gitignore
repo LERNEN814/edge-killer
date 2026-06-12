@@ -1,0 +1,29 @@
+# Build outputs
+bin/
+obj/
+publish/
+publish-single/
+
+# Visual Studio / Rider / VS Code user state
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.rsuser
+
+# Debug symbols and logs
+*.pdb
+*.log
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Packaged binaries
+*.exe
+*.msi
+*.zip
+
+# Local runtime artifacts
+*.tmp
