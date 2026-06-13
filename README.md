@@ -1,136 +1,187 @@
 # Edge Killer
 
-PowerShell MVP for keeping Microsoft Edge browser absent from a Windows machine.
+Edge Killer 是一个用于清除 Microsoft Edge 浏览器并阻止其自动回归的 Windows 工具。
 
-The tool:
+项目包含两部分：
 
-- Removes the current Microsoft Edge browser installation.
-- Installs a SYSTEM scheduled task that checks after boot and on an interval.
-- Re-runs removal if Edge appears again.
-- Writes Microsoft Edge Update policy values that attempt to block future Edge install/update behavior.
-- Preserves Microsoft Edge WebView2 Runtime by default.
+- PowerShell MVP：系统级清理脚本，适合排查和自动化。
+- WPF 图形界面：单文件 `.exe`，提供状态检测和一键清除入口。
 
-## Important boundaries
+> 请只在你拥有或有权管理的电脑上使用本工具。
 
-Run this only on a machine you own or administer.
+## 下载
 
-Removing Edge can affect Windows features and apps that expect the Edge browser to exist. The default mode avoids removing WebView2 because many applications use WebView2 as an embedded browser runtime.
+最新版本可在 GitHub Releases 下载：
 
-Microsoft can change Windows and Edge servicing behavior. This tool uses documented policy locations where possible and adds a watchdog because OS updates may still reinstall Edge.
+[下载 EdgeKiller.exe](https://github.com/LERNEN814/edge-killer/releases/download/v0.1.0/EdgeKiller.exe)
 
-## Quick start
+Release 页面：
 
-Open PowerShell as Administrator from this directory:
+[https://github.com/LERNEN814/edge-killer/releases/tag/v0.1.0](https://github.com/LERNEN814/edge-killer/releases/tag/v0.1.0)
 
-```powershell
-.\edge-killer.ps1 status
-.\edge-killer.ps1 install
-```
+## 主要功能
 
-`install` performs all MVP actions:
+- 检测 Edge 浏览器本体是否存在。
+- 检测 `EdgeCore` 核心残留是否存在。
+- 单独检测 Edge WebView2 Runtime。
+- 一键清除 Edge 和 EdgeCore。
+- 可选清除 WebView2。
+- 写入 EdgeUpdate 策略，尽量阻止自动安装和更新。
+- 创建 SYSTEM 权限计划任务，在开机后和定时周期内自动检查 Edge 是否回归。
+- 保留日志，便于排查。
 
-1. Writes EdgeUpdate blocking policies.
-2. Removes the current Edge browser.
-3. Installs the boot and interval watchdog task.
+## 图形界面版本
 
-If the official Edge uninstaller exits with a non-zero code and `status` still
-shows `msedge.exe`, run aggressive mode.
-
-## Commands
-
-```powershell
-.\edge-killer.ps1 status
-```
-
-Shows detected Edge executables, installers, directories, EdgeUpdate services/tasks, and watchdog state.
-
-`EdgeCore` is treated as Edge browser/core residue and is included in normal
-Edge detection. `EdgeWebView` is reported separately as WebView2 Runtime.
-
-```powershell
-.\edge-killer.ps1 remove
-```
-
-Runs a removal pass. It stops Edge processes, invokes Edge's official installer with uninstall flags when available, and removes common Edge shortcuts.
-
-```powershell
-.\edge-killer.ps1 harden
-```
-
-Writes EdgeUpdate policy values under:
+可执行文件位于发布包：
 
 ```text
-HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate
+EdgeKiller.exe
 ```
 
-```powershell
-.\edge-killer.ps1 install-watchdog
-```
+它是自包含单文件程序，不需要目标机器安装：
 
-Copies the script to `C:\ProgramData\EdgeKiller` and creates the `EdgeKiller-Watchdog` scheduled task running as `SYSTEM`.
+- .NET SDK
+- Visual Studio
+- .NET Desktop Runtime
 
-```powershell
-.\edge-killer.ps1 install
-```
+运行要求：
 
-Runs `harden`, `remove`, and `install-watchdog`.
+- Windows x64
+- 系统自带 Windows PowerShell 5.1，也就是 `powershell.exe`
+- 管理员权限
+- 系统策略允许程序使用 `-ExecutionPolicy Bypass` 启动 PowerShell 子进程
 
-```powershell
-.\edge-killer.ps1 restore
-```
+程序启动后会自动检测：
 
-Removes the watchdog task and restores policy values that Edge Killer changed. This does not reinstall Microsoft Edge.
+- Edge browser
+- EdgeCore
+- Edge WebView2 Runtime
 
-## Aggressive mode
+点击 `One-click remove Edge` 后，程序会：
 
-```powershell
-.\edge-killer.ps1 install -Aggressive
-```
+1. 清除 Edge 和 EdgeCore。
+2. 如果勾选 `Also remove WebView2`，额外清除 WebView2。
+3. 安装 watchdog 自动化任务。
+4. 再次检测状态。
 
-Aggressive mode additionally removes Edge directories, Edge user data directories, EdgeUpdate scheduled tasks, EdgeUpdate services, and EdgeUpdate directories.
+## 关于 WebView2
 
-This is more likely to stop Edge from returning, but it has higher compatibility risk.
+默认不删除 WebView2。
 
-Use aggressive mode when the official Edge uninstaller returns a non-zero exit
-code such as `93` and the Edge executable remains in `C:\Program Files (x86)`.
+WebView2 不是普通浏览器入口，而是很多桌面应用用来嵌入网页内容的运行时。删除 WebView2 可能导致某些应用的登录页、授权页、设置页、帮助页或内嵌网页界面无法打开。
 
-Aggressive mode includes `EdgeCore`. It does not remove `EdgeWebView` unless
-`-IncludeWebView2` is also supplied.
-
-## WebView2
-
-WebView2 is preserved by default.
-
-Only include it when you have confirmed that no required applications depend on it:
-
-```powershell
-.\edge-killer.ps1 install -Aggressive -IncludeWebView2
-```
-
-To remove WebView2 explicitly after Edge and EdgeCore have already been removed:
+如果你确认本机没有软件依赖 WebView2，可以在图形界面里勾选 `Also remove WebView2`，或使用命令行：
 
 ```powershell
 .\edge-killer.ps1 remove-webview2 -Force
 ```
 
-## Watchdog interval
+## PowerShell MVP 用法
 
-The default watchdog interval is 30 minutes, with a 90 second boot delay.
+以管理员身份打开 PowerShell：
 
 ```powershell
-.\edge-killer.ps1 install -RepeatMinutes 15 -BootDelaySeconds 120
+cd F:\edge-killer
+.\edge-killer.ps1 status
 ```
 
-## Logs
+一键执行策略加固、清除和 watchdog 安装：
 
-Logs are written to:
+```powershell
+.\edge-killer.ps1 install
+```
+
+如果官方卸载器失败，或 `EdgeCore` 仍然存在，使用强硬模式：
+
+```powershell
+.\edge-killer.ps1 remove -Aggressive
+.\edge-killer.ps1 install-watchdog -Aggressive
+```
+
+查看状态：
+
+```powershell
+.\edge-killer.ps1 status
+```
+
+撤销本工具写入的策略和 watchdog：
+
+```powershell
+.\edge-killer.ps1 restore
+```
+
+`restore` 不会重新安装 Edge。
+
+## 自动化机制
+
+工具会创建 SYSTEM 权限的计划任务：
+
+- 开机后延迟运行一次。
+- 每隔一段时间重复检查。
+
+如果检测到 Edge 或 EdgeCore 回归，watchdog 会再次执行清理。
+
+默认检查间隔为 30 分钟，开机延迟为 90 秒。PowerShell 版本可自定义：
+
+```powershell
+.\edge-killer.ps1 install-watchdog -RepeatMinutes 15 -BootDelaySeconds 120
+```
+
+## 日志位置
+
+清理脚本日志：
 
 ```text
 C:\ProgramData\EdgeKiller\logs
 ```
 
-## Current architecture
+图形界面运行时释放的脚本位置：
 
-This MVP intentionally uses a scheduled task instead of a Windows service. A SYSTEM scheduled task is simpler to install and remove, avoids a compiled service host, and is enough to satisfy boot-time and recurring checks.
+```text
+C:\ProgramData\EdgeKiller.UI\edge-killer.ps1
+```
 
-If this later needs a GUI or signed executable, the PowerShell core can be wrapped by a .NET CLI or Windows service.
+## 从源码构建
+
+需要 .NET SDK 和 Windows Desktop workload 支持。
+
+进入 WPF 项目目录：
+
+```powershell
+cd .\windows-wrapper\EdgeKiller.UI
+```
+
+发布自包含单文件 EXE：
+
+```powershell
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o .\publish-single
+```
+
+输出文件：
+
+```text
+windows-wrapper\EdgeKiller.UI\publish-single\EdgeKiller.exe
+```
+
+## 项目结构
+
+```text
+edge-killer.ps1
+  PowerShell MVP 主脚本
+
+windows-wrapper\EdgeKiller.UI
+  WPF 图形界面项目
+
+windows-wrapper\EdgeKiller.UI\Scripts\edge-killer.ps1
+  WPF 包装使用的脚本副本，包含 JSON 状态输出
+```
+
+## 重要提示
+
+Microsoft 可能通过 Windows Update 或系统组件策略重新安装 Edge。本工具通过策略和 watchdog 降低回归概率，但不能保证永久抵抗所有未来系统更新行为。
+
+删除 Edge 可能影响依赖 Edge 的 Windows 功能、PWA、搜索体验、组件跳转或其他系统体验。请在理解风险后使用。
+
+## License
+
+当前项目尚未声明开源许可证。若你计划公开分发或允许他人复用代码，建议后续添加明确许可证。
